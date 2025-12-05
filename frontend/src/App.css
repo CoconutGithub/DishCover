@@ -71,7 +71,7 @@
 
 /* 사이드바 내부 헤더 */
 .sidebar-header {
-  padding: 30px 20px 10px 20px;
+  padding: 10px 20px 10px 20px;
   background: white;
   flex-shrink: 0;
   box-shadow: 0 4px 10px rgba(0,0,0,0.05);
@@ -86,7 +86,7 @@
 .scrollable-content {
   flex: 1;
   overflow-y: auto;
-  padding: 20px;
+  padding: 15px;
   
   /* [수정] 너비 계산에 패딩을 포함시킴 */
   width: 400px; 
@@ -142,7 +142,7 @@
 /* 분석 버튼 */
 .analyze-btn {
   width: 100%;
-  padding: 15px;
+  padding: 10px;
   background: linear-gradient(135deg, #ff6b6b 0%, #fa5252 100%);
   color: white;
   border: none;
@@ -179,7 +179,7 @@
   color: #1864ab;
   padding: 6px 12px;
   border-radius: 20px;
-  font-size: 0.9rem;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
@@ -191,7 +191,7 @@
 }
 
 .list-item {
-  padding: 15px;
+  padding: 10px;
   background: white;
   border: 1px solid #f1f3f5;
   border-radius: 12px;
@@ -207,13 +207,13 @@
 
 .item-name {
   margin: 0 0 5px 0;
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   color: #343a40;
 }
 
 .item-desc {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   color: #868e96;
   display: flex;
   align-items: center;
