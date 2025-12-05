@@ -3,11 +3,13 @@
 /* 전체 레이아웃 */
 .main-layout {
   display: flex;
-  width: 100%;   /* vw 대신 % 사용 (안정성) */
-  height: 100%;  /* vh 대신 % 사용 (#root 높이를 상속) */
+  width: 100%;   /* vw 대신 % 사용 */
+  height: 100%;  /* vh 대신 % 사용 */
   overflow: hidden;
+  position: relative; /* 토글 버튼 위치 기준 */
 }
-/* 왼쪽 사이드바 */
+
+/* 왼쪽 사이드바 (수정됨) */
 .sidebar {
   width: 400px;
   min-width: 400px;
@@ -15,22 +17,80 @@
   display: flex;
   flex-direction: column;
   border-right: 1px solid #dee2e6;
-  z-index: 10;
+  z-index: 20; /* 토글 버튼보다 아래, 맵보다는 위 */
   height: 100%;
+  
+  /* 애니메이션 설정 */
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  overflow: hidden;
+  position: relative;
 }
 
+/* 사이드바 닫혔을 때 스타일 */
+.sidebar.closed {
+  width: 0;
+  min-width: 0;
+  border-right: none;
+  opacity: 0; /* 내용물 숨김 */
+}
+
+/* [NEW] 사이드바 토글 버튼 스타일 */
+.sidebar-toggle-btn {
+  position: absolute;
+  top: 50%;
+  left: 400px; /* 사이드바 열렸을 때 위치 */
+  transform: translateY(-50%);
+  z-index: 30; /* 최상위 */
+  
+  width: 24px;
+  height: 48px;
+  background-color: white;
+  border: 1px solid #dee2e6;
+  border-left: none; /* 사이드바와 붙는 느낌 */
+  border-radius: 0 8px 8px 0;
+  cursor: pointer;
+  color: #868e96;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 2px 0 6px rgba(0,0,0,0.05);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.sidebar-toggle-btn:hover {
+  background-color: #f8f9fa;
+  color: #339af0;
+}
+
+/* 사이드바 닫혔을 때 버튼 위치 이동 */
+.sidebar-toggle-btn.closed {
+  left: 0;
+}
+
+
+/* 사이드바 내부 헤더 */
 .sidebar-header {
   padding: 30px 20px 10px 20px;
   background: white;
   flex-shrink: 0;
   box-shadow: 0 4px 10px rgba(0,0,0,0.05);
   z-index: 20;
+  
+  /* [수정] 너비 계산에 패딩을 포함시킴 */
+  width: 400px; 
+  box-sizing: border-box; /* 이 줄을 꼭 추가해주세요! */
 }
 
+/* 스크롤 가능한 컨텐츠 영역 */
 .scrollable-content {
   flex: 1;
   overflow-y: auto;
   padding: 20px;
+  
+  /* [수정] 너비 계산에 패딩을 포함시킴 */
+  width: 400px; 
+  box-sizing: border-box; /* 이 줄을 꼭 추가해주세요! */
 }
 
 /* 타이틀 */
@@ -65,7 +125,7 @@
   transition: all 0.3s;
   overflow: hidden;
   margin-bottom: 15px;
-  box-sizing: border-box; /* 패딩 포함 */
+  box-sizing: border-box; 
 }
 
 .upload-box:hover {
@@ -165,14 +225,14 @@
   flex: 1; /* 남은 너비 모두 차지 */
   position: relative;
   width: 100%;
-  height: 100%; /* 부모(.main-layout) 높이 상속 */
-  background-color: #e9ecef; /* 지도가 안 뜰 때 회색 배경이라도 나오는지 확인용 */
+  height: 100%; 
+  background-color: #e9ecef; 
 }
 
 /* 실제 카카오맵이 그려지는 ID */
 #kakao-map {
   width: 100%;
-  height: 100%; /* 부모(.map-area) 높이 상속 */
+  height: 100%; 
 }
 
 .map-search-container {
@@ -185,18 +245,18 @@
   max-width: 420px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15); /* 더 부드러운 그림자 */
-  border-radius: 24px; /* 더 둥글게 */
-  background: transparent; /* 배경은 wrapper가 담당 */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
+  border-radius: 24px; 
+  background: transparent; 
   transition: all 0.3s ease;
 }
 
-/* 입력창과 버튼을 감싸는 래퍼 (여기가 실제 흰색 박스) */
+/* 입력창과 버튼을 감싸는 래퍼 */
 .search-input-wrapper {
   display: flex;
   align-items: center;
   background: white;
-  padding: 8px 8px 8px 16px; /* 왼쪽 패딩을 늘려서 아이콘 공간 확보 */
+  padding: 8px 8px 8px 16px; 
   border-radius: 24px;
   width: 100%;
   box-sizing: border-box;
@@ -204,14 +264,14 @@
 
 /* 검색 아이콘 스타일 */
 .search-input-wrapper svg {
-  color: #adb5bd; /* 은은한 회색 */
+  color: #adb5bd; 
   font-size: 1.1rem;
   margin-right: 12px;
 }
 
 /* 실제 텍스트 입력창 */
 .map-search-input {
-  flex: 1; /* 남은 공간 가득 채우기 */
+  flex: 1; 
   border: none;
   outline: none;
   font-size: 1rem;
@@ -220,14 +280,13 @@
   background: transparent;
 }
 
-/* 입력창 placeholder 색상 */
 .map-search-input::placeholder {
   color: #ced4da;
 }
 
 /* '이동' 버튼 스타일 */
 .map-search-btn {
-  background: linear-gradient(135deg, #339af0 0%, #1c7ed6 100%); /* 그라데이션 */
+  background: linear-gradient(135deg, #339af0 0%, #1c7ed6 100%); 
   color: white;
   border: none;
   padding: 8px 20px;
@@ -252,17 +311,16 @@
    ========================================= */
 .suggestion-box {
   background: white;
-  margin-top: 8px; /* 검색창과 약간 띄우기 */
-  border-radius: 12px; /* 목록 박스도 둥글게 */
+  margin-top: 8px; 
+  border-radius: 12px; 
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   max-height: 250px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* 내용 넘침 방지 */
+  overflow: hidden; 
 }
 
-/* 스크롤바 예쁘게 (크롬/사파리) */
 .suggestion-box::-webkit-scrollbar {
     width: 6px;
 }
@@ -282,7 +340,7 @@
 }
 
 .suggestion-item:hover {
-  background-color: #f1f3f5; /* 호버 시 약간 진한 회색 */
+  background-color: #f1f3f5; 
 }
 
 .suggestion-item:last-child {
@@ -297,8 +355,6 @@
   align-items: center;
 }
 
-
-/* 장소명 옆에 작은 핀 아이콘 추가 효과 (선택사항) */
 .place-name::before {
     content: '📍';
     font-size: 0.8rem;
@@ -309,7 +365,7 @@
 .place-address {
   font-size: 0.8rem;
   color: #868e96;
-  padding-left: 18px; /* 아이콘만큼 들여쓰기 */
+  padding-left: 18px; 
 }
 
 /* 인포윈도우 전체 래퍼 */
@@ -323,7 +379,7 @@
 /* 기준 위치 (빨간 핀) 스타일 */
 .custom-iw.center {
   text-align: left;
-  background-color: #fff0f0; /* 연한 빨강 배경 */
+  background-color: #fff0f0; 
   border-radius: 10px;
   color: #fa5252;
   font-weight: 800;
@@ -337,13 +393,13 @@
 /* 맛집 정보창 컨테이너 */
 .custom-iw.restaurant {
   position: relative;
-  background-color: white;   /* 배경을 흰색으로 변경 (가독성 UP) */
-  padding: 10px;             /* 내부 여백 넉넉하게 */
-  border-radius: 12px;       /* 둥근 모서리 */
-  box-shadow: 0 4px 15px rgba(0,0,0,0.15); /* 그림자로 붕 떠있는 입체감 */
-  border: 1px solid #dee2e6; /* 아주 연한 회색 테두리 (검은색 X) */
+  background-color: white;   
+  padding: 10px;             
+  border-radius: 12px;       
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15); 
+  border: 1px solid #dee2e6; 
   min-width: 150px;
-  max-width: 170px;          /* 너무 넓어지지 않게 제한 */
+  max-width: 170px;          
   text-align: left;
   font-family: 'Pretendard', 'Malgun Gothic', sans-serif;
 }
@@ -351,7 +407,7 @@
 /* 상단 헤더 영역 (카테고리 + 닫기 버튼) */
 .iw-header {
   display: flex;
-  justify-content: space-between; /* 양끝 정렬 */
+  justify-content: space-between; 
   align-items: center;
   margin-bottom: 8px;
 }
@@ -369,18 +425,18 @@
 /* 닫기 버튼 (X) 스타일 */
 .close-btn {
   background: transparent;
-  border: none;       /* 버튼 기본 테두리 제거 */
-  color: #adb5bd;     /* 연한 회색 */
+  border: none;       
+  color: #adb5bd;     
   font-size: 0.8rem;
   cursor: pointer;
   padding: 0;
-  margin-left: 10px;  /* 카테고리와 간격 */
+  margin-left: 10px;  
   line-height: 1;
   transition: color 0.2s;
 }
 
 .close-btn:hover {
-  color: #495057;     /* 마우스 올리면 진한 회색 */
+  color: #495057;    
 }
 
 /* 식당 이름 */
@@ -390,8 +446,6 @@
   font-weight: 700;
   color: #212529;
   margin-bottom: 6px;
-  
-  /* 긴 이름 말줄임표 처리 */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -399,7 +453,7 @@
 
 /* 상세보기 버튼 */
 .iw-link {
-  display: block;      /* 꽉 찬 버튼으로 변경 */
+  display: block;      
   width: 100%;
   text-decoration: none;
   background-color: #339af0;
@@ -415,5 +469,5 @@
 
 .iw-link:hover {
   background-color: #1c7ed6;
-  transform: translateY(-1px); /* 살짝 위로 올라가는 효과 */
+  transform: translateY(-1px); 
 }
