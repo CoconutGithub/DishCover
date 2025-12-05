@@ -174,3 +174,246 @@
   width: 100%;
   height: 100%; /* 부모(.map-area) 높이 상속 */
 }
+
+.map-search-container {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  width: 92%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15); /* 더 부드러운 그림자 */
+  border-radius: 24px; /* 더 둥글게 */
+  background: transparent; /* 배경은 wrapper가 담당 */
+  transition: all 0.3s ease;
+}
+
+/* 입력창과 버튼을 감싸는 래퍼 (여기가 실제 흰색 박스) */
+.search-input-wrapper {
+  display: flex;
+  align-items: center;
+  background: white;
+  padding: 8px 8px 8px 16px; /* 왼쪽 패딩을 늘려서 아이콘 공간 확보 */
+  border-radius: 24px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 검색 아이콘 스타일 */
+.search-input-wrapper svg {
+  color: #adb5bd; /* 은은한 회색 */
+  font-size: 1.1rem;
+  margin-right: 12px;
+}
+
+/* 실제 텍스트 입력창 */
+.map-search-input {
+  flex: 1; /* 남은 공간 가득 채우기 */
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  color: #495057;
+  padding: 4px 0;
+  background: transparent;
+}
+
+/* 입력창 placeholder 색상 */
+.map-search-input::placeholder {
+  color: #ced4da;
+}
+
+/* '이동' 버튼 스타일 */
+.map-search-btn {
+  background: linear-gradient(135deg, #339af0 0%, #1c7ed6 100%); /* 그라데이션 */
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(51, 154, 240, 0.3);
+  margin-left: 8px;
+}
+
+.map-search-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(51, 154, 240, 0.4);
+}
+.map-search-btn:active {
+  transform: translateY(0);
+}
+
+/* =========================================
+   자동완성 목록 박스 스타일
+   ========================================= */
+.suggestion-box {
+  background: white;
+  margin-top: 8px; /* 검색창과 약간 띄우기 */
+  border-radius: 12px; /* 목록 박스도 둥글게 */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  max-height: 250px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* 내용 넘침 방지 */
+}
+
+/* 스크롤바 예쁘게 (크롬/사파리) */
+.suggestion-box::-webkit-scrollbar {
+    width: 6px;
+}
+.suggestion-box::-webkit-scrollbar-thumb {
+    background-color: #dee2e6;
+    border-radius: 3px;
+}
+
+.suggestion-item {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f8f9fa;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: background-color 0.2s;
+}
+
+.suggestion-item:hover {
+  background-color: #f1f3f5; /* 호버 시 약간 진한 회색 */
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.place-name {
+  font-size: 0.95rem;
+  font-weight: bold;
+  color: #343a40;
+  display: flex;
+  align-items: center;
+}
+
+
+/* 장소명 옆에 작은 핀 아이콘 추가 효과 (선택사항) */
+.place-name::before {
+    content: '📍';
+    font-size: 0.8rem;
+    margin-right: 6px;
+    opacity: 0.7;
+}
+
+.place-address {
+  font-size: 0.8rem;
+  color: #868e96;
+  padding-left: 18px; /* 아이콘만큼 들여쓰기 */
+}
+
+/* 인포윈도우 전체 래퍼 */
+.custom-iw {
+  padding: 10px 15px;
+  min-width: 80px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-align: center;
+}
+
+/* 기준 위치 (빨간 핀) 스타일 */
+.custom-iw.center {
+  text-align: left;
+  background-color: #fff0f0; /* 연한 빨강 배경 */
+  border-radius: 10px;
+  color: #fa5252;
+  font-weight: 800;
+  font-size: 0.75rem;
+  padding: 4px 4px;
+  border: 1px solid #ffc9c9;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.16);
+  white-space: nowrap;
+}
+
+/* 맛집 정보창 컨테이너 */
+.custom-iw.restaurant {
+  position: relative;
+  background-color: white;   /* 배경을 흰색으로 변경 (가독성 UP) */
+  padding: 10px;             /* 내부 여백 넉넉하게 */
+  border-radius: 12px;       /* 둥근 모서리 */
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15); /* 그림자로 붕 떠있는 입체감 */
+  border: 1px solid #dee2e6; /* 아주 연한 회색 테두리 (검은색 X) */
+  min-width: 150px;
+  max-width: 170px;          /* 너무 넓어지지 않게 제한 */
+  text-align: left;
+  font-family: 'Pretendard', 'Malgun Gothic', sans-serif;
+}
+
+/* 상단 헤더 영역 (카테고리 + 닫기 버튼) */
+.iw-header {
+  display: flex;
+  justify-content: space-between; /* 양끝 정렬 */
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+/* 카테고리 배지 */
+.iw-category {
+  font-size: 0.6rem;
+  color: #1864ab;
+  background-color: #e7f5ff;
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+/* 닫기 버튼 (X) 스타일 */
+.close-btn {
+  background: transparent;
+  border: none;       /* 버튼 기본 테두리 제거 */
+  color: #adb5bd;     /* 연한 회색 */
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 10px;  /* 카테고리와 간격 */
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.close-btn:hover {
+  color: #495057;     /* 마우스 올리면 진한 회색 */
+}
+
+/* 식당 이름 */
+.iw-title {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #212529;
+  margin-bottom: 6px;
+  
+  /* 긴 이름 말줄임표 처리 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 상세보기 버튼 */
+.iw-link {
+  display: block;      /* 꽉 찬 버튼으로 변경 */
+  width: 100%;
+  text-decoration: none;
+  background-color: #339af0;
+  color: white !important;
+  padding: 8px 0;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+  transition: all 0.2s;
+  margin-top: 8px;
+}
+
+.iw-link:hover {
+  background-color: #1c7ed6;
+  transform: translateY(-1px); /* 살짝 위로 올라가는 효과 */
+}
