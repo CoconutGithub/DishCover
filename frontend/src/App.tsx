@@ -201,7 +201,7 @@ function App() {
         const overlay = new window.kakao.maps.CustomOverlay({
             position: position,
             content: content,
-            yAnchor: 1.5,
+            yAnchor: 1.4,
             zIndex: 100
         });
 
