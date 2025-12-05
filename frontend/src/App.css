@@ -1,42 +1,176 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* frontend/src/App.css */
+
+/* 전체 레이아웃 */
+.main-layout {
+  display: flex;
+  width: 100%;   /* vw 대신 % 사용 (안정성) */
+  height: 100%;  /* vh 대신 % 사용 (#root 높이를 상속) */
+  overflow: hidden;
+}
+/* 왼쪽 사이드바 */
+.sidebar {
+  width: 400px;
+  min-width: 400px;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #dee2e6;
+  z-index: 10;
+  height: 100%;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.sidebar-header {
+  padding: 30px 20px 10px 20px;
+  background: white;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  z-index: 20;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.scrollable-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+/* 타이틀 */
+.title {
+  font-size: 1.8rem;
+  color: #212529;
+  margin: 0 0 5px 0;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.card {
-  padding: 2em;
+.sub-title {
+  color: #868e96;
+  margin: 0 0 20px 0;
+  font-size: 0.9rem;
 }
 
-.read-the-docs {
-  color: #888;
+/* 업로드 박스 */
+.upload-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 180px;
+  background-color: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s;
+  overflow: hidden;
+  margin-bottom: 15px;
+  box-sizing: border-box; /* 패딩 포함 */
+}
+
+.upload-box:hover {
+  border-color: #ff6b6b;
+  background-color: #fff5f5;
+}
+
+.preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 분석 버튼 */
+.analyze-btn {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg, #ff6b6b 0%, #fa5252 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.analyze-btn:disabled {
+  background: #e9ecef;
+  color: #adb5bd;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.analyze-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+}
+
+/* 키워드 */
+.keyword-section {
+  margin-bottom: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.keyword-badge {
+  background-color: #e7f5ff;
+  color: #1864ab;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* 리스트 아이템 */
+.list-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.list-item {
+  padding: 15px;
+  background: white;
+  border: 1px solid #f1f3f5;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+}
+
+.list-item:hover {
+  border-color: #ff6b6b;
+  transform: translateY(-2px);
+}
+
+.item-name {
+  margin: 0 0 5px 0;
+  font-size: 1.05rem;
+  color: #343a40;
+}
+
+.item-desc {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #868e96;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* 오른쪽 지도 영역 (중요!) */
+.map-area {
+  flex: 1; /* 남은 너비 모두 차지 */
+  position: relative;
+  width: 100%;
+  height: 100%; /* 부모(.main-layout) 높이 상속 */
+  background-color: #e9ecef; /* 지도가 안 뜰 때 회색 배경이라도 나오는지 확인용 */
+}
+
+/* 실제 카카오맵이 그려지는 ID */
+#kakao-map {
+  width: 100%;
+  height: 100%; /* 부모(.map-area) 높이 상속 */
 }

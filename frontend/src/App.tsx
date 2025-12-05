@@ -1,158 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import styled from "styled-components";
-import { FaCamera, FaMapMarkerAlt, FaUtensils, FaSearchLocation } from "react-icons/fa";
+import "./App.css"; // CSS 파일 임포트 필수!
+import { FaCamera, FaMapMarkerAlt, FaUtensils, FaExternalLinkAlt } from "react-icons/fa";
 
-// --- [스타일 컴포넌트] CSS 영역 ---
-const Container = styled.div`
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 40px 20px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  text-align: center;
-  background-color: #ffffff;
-  min-height: 100vh;
-`;
-
-const Title = styled.h1`
-  color: #212529;
-  font-size: 2.5rem;
-  margin-bottom: 10px;
-  font-weight: 800;
-`;
-
-const SubTitle = styled.p`
-  color: #868e96;
-  margin-bottom: 40px;
-  font-size: 1.1rem;
-`;
-
-const UploadBox = styled.label`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 250px;
-  background-color: #f8f9fa;
-  border: 3px dashed #dee2e6;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  overflow: hidden;
-
-  &:hover {
-    border-color: #ff6b6b;
-    background-color: #fff5f5;
+// TypeScript 타입 정의
+declare global {
+  interface Window {
+    kakao: any;
   }
-`;
+}
 
-const HiddenInput = styled.input`
-  display: none;
-`;
-
-const PreviewImage = styled.img`
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-`;
-
-const IconWrapper = styled.div`
-  font-size: 3rem;
-  color: #adb5bd;
-  margin-bottom: 10px;
-`;
-
-const AnalyzeButton = styled.button`
-  margin-top: 30px;
-  width: 100%;
-  padding: 18px;
-  background: linear-gradient(135deg, #ff6b6b 0%, #fa5252 100%);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-size: 1.2rem;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 0 4px 15px rgba(250, 82, 82, 0.3);
-  transition: transform 0.2s, box-shadow 0.2s;
-
-  &:disabled {
-    background: #e9ecef;
-    color: #adb5bd;
-    cursor: not-allowed;
-    box-shadow: none;
-  }
-
-  &:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(250, 82, 82, 0.4);
-  }
-`;
-
-const ResultSection = styled.div`
-  margin-top: 50px;
-  text-align: left;
-  animation: fadeIn 0.5s ease-in-out;
-`;
-
-const KeywordBadge = styled.span`
-  display: inline-block;
-  background-color: #e7f5ff;
-  color: #1971c2;
-  padding: 8px 16px;
-  border-radius: 20px;
-  margin-right: 8px;
-  margin-bottom: 8px;
-  font-weight: 600;
-  font-size: 0.95rem;
-`;
-
-const RestaurantCard = styled.a`
-  display: block;
-  background: white;
-  padding: 20px;
-  border-radius: 16px;
-  border: 1px solid #f1f3f5;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  margin-bottom: 16px;
-  text-decoration: none;
-  color: inherit;
-  transition: all 0.2s;
-
-  &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    border-color: #ff6b6b;
-  }
-`;
-
-const CardHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-`;
-
-const Name = styled.h3`
-  margin: 0;
-  font-size: 1.2rem;
-  color: #343a40;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-`;
-
-const Address = styled.p`
-  margin: 0;
-  font-size: 0.95rem;
-  color: #868e96;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-`;
-
-// --- [TypeScript 타입 정의] ---
 interface Restaurant {
   place_name: string;
   road_address_name: string;
@@ -160,130 +17,271 @@ interface Restaurant {
   place_url: string;
   phone: string;
   category_name: string;
+  x: string;
+  y: string;
 }
 
-// --- [메인 컴포넌트] ---
 function App() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [keywords, setKeywords] = useState<string[]>([]);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  
+  const [myLocation, setMyLocation] = useState<{lat: number, lon: number} | null>(null);
+  const [map, setMap] = useState<any>(null);
+  const [markers, setMarkers] = useState<any[]>([]);
 
-  // 파일 선택 시 처리
+  // --- [1. 지도 초기화 및 디버깅] ---
+  useEffect(() => {
+    console.log("🚀 [1] useEffect 시작");
+
+    const initMap = () => {
+      console.log("🚀 [3] initMap 함수 실행됨");
+
+      const container = document.getElementById('kakao-map');
+      
+      // 1. 컨테이너 존재 여부 확인
+      if (!container) {
+        console.error("❌ [ERROR] 지도 컨테이너(#kakao-map)를 찾을 수 없음!");
+        return;
+      }
+      console.log("✅ [INFO] 지도 컨테이너 찾음:", container);
+
+      // 2. 컨테이너 높이 확인 (이게 0이면 화면에 안 보임)
+      const width = container.offsetWidth;
+      const height = container.offsetHeight;
+      console.log(`📏 [CHECK] 지도 영역 크기: ${width}px x ${height}px`);
+
+      if (height === 0) {
+        console.warn("⚠️ [WARNING] 지도 높이가 0px입니다! CSS(height: 100%) 설정을 확인하세요.");
+        container.style.height = "100%"; // 강제로 높이 줘보기 (임시 조치)
+      }
+
+      // 3. 지도 생성 시도
+      try {
+        const options = {
+          center: new window.kakao.maps.LatLng(37.566826, 126.9786567), 
+          level: 4
+        };
+        const kakaoMap = new window.kakao.maps.Map(container, options);
+        setMap(kakaoMap);
+        console.log("✅ [SUCCESS] 카카오맵 객체 생성 성공!");
+
+        // 4. 내 위치 가져오기
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition((pos) => {
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+            setMyLocation({ lat, lon });
+            console.log("📍 [INFO] 내 위치 확보:", lat, lon);
+            
+            const locPosition = new window.kakao.maps.LatLng(lat, lon);
+            kakaoMap.setCenter(locPosition);
+            
+            const marker = new window.kakao.maps.Marker({ position: locPosition });
+            marker.setMap(kakaoMap);
+
+            const iwContent = '<div style="padding:5px; color:black;">📍 내 위치</div>';
+            const infowindow = new window.kakao.maps.InfoWindow({ content: iwContent });
+            infowindow.open(kakaoMap, marker);
+          }, (err) => {
+            console.error("❌ [ERROR] 위치 권한 거부됨:", err);
+          });
+        }
+      } catch (err) {
+        console.error("❌ [ERROR] 지도 생성 중 오류 발생:", err);
+      }
+    };
+
+    // 2. 스크립트 로드 확인
+    if (window.kakao && window.kakao.maps) {
+      console.log("✅ [INFO] 카카오 스크립트가 이미 로드되어 있음");
+      initMap();
+    } else {
+      console.log("🔄 [INFO] 카카오 스크립트 로딩 시작...");
+      const scriptId = "kakao-map-script";
+      
+      if (!document.getElementById(scriptId)) {
+        const script = document.createElement("script");
+        const apiKey = import.meta.env.VITE_KAKAO_JS_KEY;
+        
+        console.log("🔑 [CHECK] API Key:", apiKey ? "존재함 (보안상 값은 숨김)" : "❌ 없음 (undefined)");
+
+        
+        script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${apiKey}&autoload=false`;
+        script.id = scriptId;
+        script.async = true;
+        
+        script.onload = () => {
+          console.log("✅ [INFO] 스크립트 로드 완료 (onload)");
+          window.kakao.maps.load(() => {
+            console.log("✅ [INFO] 카카오맵 모듈 초기화 완료 (maps.load)");
+            initMap();
+          });
+        };
+        
+        script.onerror = () => {
+            console.error("❌ [ERROR] 스크립트 로드 실패! (API 키나 도메인 제한 확인)");
+        };
+
+        document.head.appendChild(script);
+      }
+    }
+  }, []);
+
+  // --- [2. 마커 업데이트] ---
+  useEffect(() => {
+    if (!map || restaurants.length === 0) return;
+    console.log(`📍 [INFO] 마커 ${restaurants.length}개 찍기 시작`);
+
+    // 기존 마커 삭제
+    markers.forEach(m => m.setMap(null));
+    const newMarkers: any[] = [];
+    const bounds = new window.kakao.maps.LatLngBounds();
+
+    if (myLocation) {
+        bounds.extend(new window.kakao.maps.LatLng(myLocation.lat, myLocation.lon));
+    }
+
+    restaurants.forEach((res) => {
+      const position = new window.kakao.maps.LatLng(parseFloat(res.y), parseFloat(res.x));
+      
+      const marker = new window.kakao.maps.Marker({
+        position: position,
+        title: res.place_name,
+      });
+      
+      marker.setMap(map);
+      newMarkers.push(marker);
+      bounds.extend(position);
+
+      window.kakao.maps.event.addListener(marker, 'click', function() {
+        const content = `
+          <div style="padding:10px;font-size:12px;color:black;">
+            <strong>${res.place_name}</strong><br/>
+            <a href="${res.place_url}" target="_blank" style="color:blue;">상세보기</a>
+          </div>`;
+        const infowindow = new window.kakao.maps.InfoWindow({ content: content, removable: true });
+        infowindow.open(map, marker);
+      });
+    });
+
+    setMarkers(newMarkers);
+    map.setBounds(bounds);
+  }, [restaurants, map]);
+
+  // --- [핸들러 함수들] ---
+  const handleAnalyze = async () => {
+    if (!selectedFile) return;
+    setLoading(true);
+
+    const getCurrentLocation = () => {
+      return new Promise<{lat: number, lon: number}>((resolve, reject) => {
+        if (myLocation) {
+          resolve(myLocation);
+        } else {
+          if (!navigator.geolocation) {
+            reject(new Error("Geolocation not supported"));
+            return;
+          }
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              const { latitude, longitude } = pos.coords;
+              setMyLocation({ lat: latitude, lon: longitude });
+              resolve({ lat: latitude, lon: longitude });
+            },
+            (err) => reject(err)
+          );
+        }
+      });
+    };
+
+    try {
+      const location = await getCurrentLocation();
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      formData.append("lat", location.lat.toString());
+      formData.append("lon", location.lon.toString());
+
+      const response = await axios.post("http://127.0.0.1:8000/api/recommend", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      console.log("✅ 결과:", response.data);
+      setKeywords(response.data.analysis_keywords);
+      setRestaurants(response.data.recommendations);
+    } catch (error) {
+      console.error("❌ 에러:", error);
+      alert("분석 중 오류가 발생했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
+    if (e.target.files?.[0]) {
       const file = e.target.files[0];
       setSelectedFile(file);
       setPreview(URL.createObjectURL(file));
-      // 초기화
-      setKeywords([]);
       setRestaurants([]);
     }
   };
 
-  // 분석 요청
-  const handleAnalyze = async () => {
-    if (!selectedFile) return;
-
-    setLoading(true);
-
-    // 1. 브라우저에서 현재 위치(위도, 경도) 가져오기
-    if (!navigator.geolocation) {
-      alert("이 브라우저는 위치 정보를 지원하지 않습니다.");
-      setLoading(false);
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-        console.log("📍 현재 위치:", latitude, longitude);
-
-        // 2. 백엔드로 보낼 데이터 준비 (FormData)
-        const formData = new FormData();
-        formData.append("file", selectedFile);
-        formData.append("lat", latitude.toString());
-        formData.append("lon", longitude.toString());
-
-        try {
-          // 3. FastAPI 서버로 요청 전송
-          // 주의: 백엔드 포트가 8000번인지 확인하세요!
-          const response = await axios.post("http://127.0.0.1:8000/api/recommend", formData, {
-            headers: { "Content-Type": "multipart/form-data" },
-          });
-
-          console.log("✅ 서버 응답:", response.data);
-          setKeywords(response.data.analysis_keywords);
-          setRestaurants(response.data.recommendations);
-
-        } catch (error) {
-          console.error("❌ API 에러:", error);
-          alert("서버 연결에 실패했습니다. 백엔드가 켜져있는지 확인해주세요.");
-        } finally {
-          setLoading(false);
-        }
-      },
-      (error) => {
-        console.error("❌ 위치 에러:", error);
-        alert("위치 정보 권한을 허용해주세요! 내 주변 맛집을 찾으려면 위치가 필요합니다.");
-        setLoading(false);
-      }
-    );
-  };
-
   return (
-    <Container>
-      <Title>📸 DishCover</Title>
-      <SubTitle>사진으로 찾는 내 취향 저격 맛집</SubTitle>
+    <div className="main-layout">
+      {/* 1. 사이드바 */}
+      <div className="sidebar">
+        <div className="sidebar-header">
+          <h1 className="title">🍕 DishCover</h1>
+          <p className="sub-title">사진으로 찾는 내 주변 맛집</p>
 
-      {/* 1. 이미지 업로드 영역 */}
-      <UploadBox>
-        {preview ? (
-          <PreviewImage src={preview} alt="음식 미리보기" />
-        ) : (
-          <>
-            <IconWrapper><FaCamera /></IconWrapper>
-            <span style={{ color: "#adb5bd", fontWeight: 500 }}>
-              여기를 클릭해 음식 사진을 올려주세요
-            </span>
-          </>
-        )}
-        <HiddenInput type="file" accept="image/*" onChange={handleFileChange} />
-      </UploadBox>
+          <label className="upload-box">
+            {preview ? (
+              <img src={preview} alt="미리보기" className="preview-image" />
+            ) : (
+              <>
+                <FaCamera size={30} color="#ced4da" style={{marginBottom: 10}}/>
+                <span style={{color: "#adb5bd"}}>음식 사진 업로드</span>
+              </>
+            )}
+            <input type="file" accept="image/*" onChange={handleFileChange} style={{display:'none'}} />
+          </label>
 
-      {/* 2. 분석 버튼 */}
-      <AnalyzeButton onClick={handleAnalyze} disabled={loading || !selectedFile}>
-        {loading ? "AI가 미식 데이터를 분석 중입니다... 🍳" : "내 주변 맛집 추천 받기 🚀"}
-      </AnalyzeButton>
+          <button className="analyze-btn" onClick={handleAnalyze} disabled={loading || !selectedFile}>
+            {loading ? "AI 분석 중... 🍳" : "맛집 찾기 🚀"}
+          </button>
+        </div>
 
-      {/* 3. 결과 표시 영역 */}
-      {(keywords.length > 0 || restaurants.length > 0) && (
-        <ResultSection>
-          <div style={{ marginBottom: "30px" }}>
-            <h3 style={{ color: "#495057", marginBottom: "15px" }}>🧐 분석된 취향 키워드</h3>
-            {keywords.map((k, i) => (
-              <KeywordBadge key={i}>#{k}</KeywordBadge>
-            ))}
+        <div className="scrollable-content">
+          <div className="keyword-section">
+            {keywords.map((k, i) => <span key={i} className="keyword-badge">#{k}</span>)}
           </div>
 
-          <h3 style={{ color: "#495057", marginBottom: "15px" }}>📍 추천 맛집 리스트</h3>
-          {restaurants.length === 0 ? (
-            <p style={{ color: "#868e96" }}>검색된 맛집이 없습니다. 거리를 늘려보거나 다른 사진을 써보세요!</p>
-          ) : (
-            restaurants.map((res, i) => (
-              <RestaurantCard key={i} href={res.place_url} target="_blank" rel="noopener noreferrer">
-                <CardHeader>
-                  <Name><FaUtensils color="#ff6b6b" size={16}/> {res.place_name}</Name>
-                  <span style={{ fontSize: "0.85rem", color: "#ced4da" }}>{res.category_name.split(">").pop()}</span>
-                </CardHeader>
-                <Address><FaMapMarkerAlt color="#868e96"/> {res.road_address_name || res.address_name}</Address>
-              </RestaurantCard>
-            ))
-          )}
-        </ResultSection>
-      )}
-    </Container>
+          <div className="list-section">
+            {restaurants.length === 0 && !loading && (
+              <p style={{color: "#868e96", textAlign: "center", marginTop: 20}}>
+                사진을 올리고 맛집을 찾아보세요!
+              </p>
+            )}
+            {restaurants.map((res, i) => (
+              <div key={i} className="list-item" onClick={() => window.open(res.place_url)}>
+                <h4 className="item-name">{res.place_name}</h4>
+                <p className="item-desc"><FaMapMarkerAlt size={12}/> {res.road_address_name}</p>
+                <p className="item-desc" style={{marginTop: 5, color: "#339af0"}}>
+                  <FaExternalLinkAlt size={10}/> 상세정보 보기
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* 2. 지도 영역 */}
+      <div className="map-area">
+        <div id="kakao-map"></div>
+      </div>
+    </div>
   );
 }
 
